@@ -30,12 +30,54 @@ void addNode(Node * node, int value) {
   }
 }
 
+bool _isLeaf(Node * node) {
+  return node != NULL && node -> left == NULL && node -> right == NULL;
+}
+
+bool _remove(Node ** node, int value) {
+  if (node != NULL && (*node) -> value == value) {
+    if(_isLeaf(*node)) {
+      *node = NULL;
+      return true;
+    } else {
+      if ((*node) -> left == NULL && (*node) -> right != NULL) {
+        *node = (*node) -> right;
+        return true;
+      } else if ((*node) -> left != NULL && (*node) -> right == NULL) {
+        *node = (*node) -> left;
+        return true;
+      } else {
+        // two children
+      }
+    }
+  }
+  return false;
+}
+
+// http://profs.sci.univr.it/~macedonio/web/Teaching/ASD2013/L03-ABR.pdf
+// http://www.diit.unict.it/users/carchiol/fondamenti/lezioni/LC06.pdf
 void removeNode(Node * node, int value) {
   if (node == NULL) {
     return;
   }
 
-  if (node -> value == value)
+  bool removedOnLeft = false;
+  bool removedOnRight = false;
+
+  if (node -> left != NULL) {
+    removedOnLeft = _remove(&(node -> left), value);
+  }
+
+  if (node -> right != NULL) {
+    removedOnRight = _remove(&(node -> right), value);
+  }
+
+  if (removedOnLeft || removedOnRight) {
+    return;
+  }
+
+  removeNode(node -> left, value);
+  removeNode(node -> right, value);
 }
 
 bool findNode(Node * node, int value) {
@@ -53,28 +95,23 @@ bool findNode(Node * node, int value) {
 void preorder(Node * node) {
   if (node != NULL) {
     printf("%d\n", node -> value);
-    printTree(node -> left);
-    printTree(node -> right);
+    preorder(node -> left);
+    preorder(node -> right);
   }
 }
-
 
 int main(int argc, char const *argv[])
 {
   Node * root = createNode(8);
   addNode(root, 3);
   addNode(root, 10);
-  addNode(root, 1);
-  addNode(root, 6);
-  addNode(root, 14);
-  addNode(root, 4);
-  addNode(root, 7);
-  addNode(root, 13);
+  addNode(root, 12);
 
-  printTree(root);
+  removeNode(root, 12);
+  removeNode(root, 3);
+
+  preorder(root);
   printf("Node 1 exists? %d\n", findNode(root, 6));
-  printf("Node 7 exists? %d\n", findNode(root, 7));
-  printf("Node 25 exists? %d\n", findNode(root, 25));
-
+  
   return 0;
 }
